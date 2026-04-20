@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>おそうじログ ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #F9F7F2;
+    --accent-orange: #E26D43;
+    --accent-blue: #84A3BF;
+    --text-main: #4A433F;
+    --white: #FFFFFF;
+    --card-shadow: 0 10px 25px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    padding-bottom: 80px;
+  }
+
+  .header {
+    background-color: var(--white);
+    padding: 25px;
+    text-align: center;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: var(--card-shadow);
+  }
+  .header h1 { font-size: 20px; color: var(--accent-orange); }
+
+  .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.4s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .timer-card {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+  }
+  .timer-display { font-size: 48px; font-weight: 700; color: var(--accent-blue); margin: 15px 0; }
+  .timer-controls { display: flex; justify-content: center; gap: 10px; }
+  .btn {
+    border: none; border-radius: 15px; padding: 12px 25px;
+    font-weight: 700; cursor: pointer; transition: 0.2s; font-family: inherit;
+  }
+  .btn-orange { background: var(--accent-orange); color: var(--white); box-shadow: 0 4px 10px rgba(226, 109, 67, 0.3); }
+  .btn-blue { background: var(--accent-blue); color: var(--white); }
+  .btn-outline { background: var(--white); border: 2px solid var(--bg-base); color: var(--text-main); }
+
+  .section-title { font-size: 14px; font-weight: 700; margin: 20px 0 10px; padding-left: 5px; color: var(--accent-blue); }
+  .loc-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
+  .loc-tab {
+    white-space: nowrap; padding: 8px 16px; border-radius: 20px; background: var(--white);
+    font-size: 13px; font-weight: 700; cursor: pointer; border: none;
+  }
+  .loc-tab.active { background: var(--accent-blue); color: var(--white); }
+
+  .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+  .task-btn {
+    background: var(--white); border: none; border-radius: 18px; padding: 15px 10px;
+    font-size: 13px; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.02); cursor: pointer;
+  }
+
+  .manual-input {
+    background: var(--white); border-radius: 20px; padding: 20px; margin-top: 15px;
+    box-shadow: var(--card-shadow);
+  }
+  .input-field {
+    width: 100%; padding: 12px; border: 2px solid var(--bg-base); border-radius: 12px;
+    margin-bottom: 10px; font-family: inherit; outline: none;
+  }
+
+  .calendar-card { background: var(--white); border-radius: 24px; padding: 20px; box-shadow: var(--card-shadow); }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+  .cal-day { font-size: 12px; padding: 10px 0; border-radius: 10px; position: relative; }
+  .has-log::after {
+    content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+    width: 5px; height: 5px; border-radius: 50%; background: var(--accent-orange);
+  }
+
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; background: var(--white);
+    display: flex; justify-content: space-around; padding: 15px 0;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.03); z-index: 100;
+  }
+  .nav-item { border: none; background: none; color: #BBB; font-size: 10px; font-weight: 700; cursor: pointer; }
+  .nav-item.active { color: var(--accent-orange); }
+  .nav-icon { display: block; font-size: 20px; margin-bottom: 3px; }
+
+  .log-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--bg-base); }
+  .log-task { font-weight: 700; font-size: 14px; }
+  .log-info { font-size: 11px; color: #AAA; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>おそうじログ</h1>
+</div>
+
+<div class="container">
+  <div id="panel-log" class="panel active">
+    <div class="timer-card">
+      <div id="timerDisplay" class="timer-display">00:00</div>
+      <div class="timer-controls">
+        <button id="timerBtn" class="btn btn-orange" onclick="toggleTimer()">スタート</button>
+        <button class="btn btn-outline" onclick="resetTimer()">リセット</button>
+      </div>
+    </div>
+
+    <div class="section-title">テンプレート</div>
+    <div class="loc-tabs">
+      <button class="loc-tab active" onclick="filterTasks('living', this)">リビング</button>
+      <button class="loc-tab" onclick="filterTasks('kitchen', this)">キッチン</button>
+      <button class="loc-tab" onclick="filterTasks('bath', this)">水まわり</button>
+      <button class="loc-tab" onclick="filterTasks('other', this)">その他</button>
+    </div>
+    <div class="template-grid" id="taskButtons"></div>
+
+    <div class="manual-input">
+      <input type="text" id="manualTask" class="input-field" placeholder="自由に入力...">
+      <input type="number" id="manualTime" class="input-field" placeholder="時間（分）※手入力の場合">
+      <button class="btn btn-blue" style="width:100%" onclick="saveFromManual()">記録する</button>
+    </div>
+  </div>
+
+  <div id="panel-cal" class="panel">
+    <div class="calendar-card">
+      <div class="cal-header">
+        <button onclick="changeMonth(-1)">◀</button>
+        <div id="calTitle" style="font-weight:700">2026年4月</div>
+        <button onclick="changeMonth(1)">▶</button>
+      </div>
+      <div class="cal-grid" id="calendarGrid"></div>
+    </div>
+    <div class="section-title">最近の記録</div>
+    <div id="recentLogs" class="calendar-card" style="margin-top:10px;"></div>
+  </div>
+
+  <div id="panel-settings" class="panel">
+    <div class="manual-input">
+      <div class="section-title" style="margin-top:0">Googleスプレッドシート連携</div>
+      <input type="text" id="gasUrl" class="input-field" placeholder="GASのウェブアプリURL">
+      <button class="btn btn-orange" style="width:100%" onclick="saveSettings()">設定を保存</button>
+    </div>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <button class="nav-item active" onclick="switchTab('log', this)"><span class="nav-icon">🧹</span>記録</button>
+  <button class="nav-item" onclick="switchTab('cal', this)"><span class="nav-icon">📅</span>カレンダー</button>
+  <button class="nav-item" onclick="switchTab('settings', this)"><span class="nav-icon">⚙️</span>設定</button>
+</nav>
+
+<script>
+const TASKS = {
+  living: ["掃除機", "床拭き", "片付け", "窓拭き"],
+  kitchen: ["シンク磨き", "コンロ掃除", "冷蔵庫整理", "食器洗い"],
+  bath: ["お風呂掃除", "トイレ掃除", "洗面台磨き", "鏡拭き"],
+  other: ["ゴミ捨て", "断捨離", "玄関掃除", "洗濯"]
+};
+
+// URLをここに埋め込みました
+const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycby0q1HO8U5MAKYLOgu9JTlZVX1KwBIawsXO_znSif2WoFjIUMnyx6HhYAmmC3VP4lVhNQ/exec";
+
+let logs = JSON.parse(localStorage.getItem('clean_logs') || '[]');
+let gasUrl = localStorage.getItem('clean_gas_url') || DEFAULT_GAS_URL;
+let timerInterval;
+let seconds = 0;
+let isRunning = false;
+let currentMonth = new Date();
+
+function init() {
+  filterTasks('living', document.querySelector('.loc-tab'));
+  renderCalendar();
+  document.getElementById('gasUrl').value = gasUrl;
+}
+
+function toggleTimer() {
+  const btn = document.getElementById('timerBtn');
+  if (!isRunning) {
+    isRunning = true;
+    btn.textContent = "ストップ";
+    btn.classList.replace('btn-orange', 'btn-blue');
+    timerInterval = setInterval(() => {
+      seconds++;
+      updateTimerDisplay();
+    }, 1000);
+  } else {
+    stopTimer();
+  }
+}
+
+function stopTimer() {
+  isRunning = false;
+  clearInterval(timerInterval);
+  const btn = document.getElementById('timerBtn');
+  btn.textContent = "スタート";
+  btn.classList.replace('btn-blue', 'btn-orange');
+}
+
+function resetTimer() {
+  stopTimer();
+  seconds = 0;
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  document.getElementById('timerDisplay').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function filterTasks(category, el) {
+  document.querySelectorAll('.loc-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const container = document.getElementById('taskButtons');
+  container.innerHTML = TASKS[category].map(t => `
+    <button class="task-btn" onclick="saveRecord('${t}')">${t}</button>
+  `).join('');
+}
+
+async function saveRecord(taskName, manualMin = null) {
+  const duration = manualMin || Math.ceil(seconds / 60);
+  const entry = {
+    date: new Date().toLocaleDateString('ja-JP'),
+    time: new Date().toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'}),
+    task: taskName,
+    duration: duration,
+    timestamp: new Date().getTime()
+  };
+
+  logs.unshift(entry);
+  localStorage.setItem('clean_logs', JSON.stringify(logs));
+  
+  if (gasUrl) {
+    fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) });
+  }
+
+  alert(`「${taskName}」を記録しました！ (${duration}分)`);
+  resetTimer();
+  renderCalendar();
+}
+
+function saveFromManual() {
+  const task = document.getElementById('manualTask').value;
+  const time = document.getElementById('manualTime').value;
+  if (!task) return alert("内容を入力してください");
+  saveRecord(task, time || 0);
+  document.getElementById('manualTask').value = '';
+  document.getElementById('manualTime').value = '';
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  const title = document.getElementById('calTitle');
+  grid.innerHTML = '';
+  
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  title.textContent = `${year}年${month + 1}月`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayEl = document.createElement('div');
+    dayEl.className = 'cal-day';
+    dayEl.textContent = d;
+    const dateStr = `${year}/${month + 1}/${d}`;
+    if (logs.some(l => new Date(l.date).toLocaleDateString('ja-JP') === new Date(dateStr).toLocaleDateString('ja-JP'))) {
+      dayEl.classList.add('has-log');
+    }
+    grid.appendChild(dayEl);
+  }
+
+  const recent = document.getElementById('recentLogs');
+  recent.innerHTML = logs.slice(0, 5).map(l => `
+    <div class="log-item">
+      <div>
+        <div class="log-task">${l.task}</div>
+        <div class="log-info">${l.date} ${l.time}</div>
+      </div>
+      <div style="font-weight:700; color:var(--accent-blue)">${l.duration}分</div>
+    </div>
+  `).join('') || '<p style="text-align:center; font-size:12px; color:#AAA;">記録がありません</p>';
+}
+
+function changeMonth(diff) {
+  currentMonth.setMonth(currentMonth.getMonth() + diff);
+  renderCalendar();
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function saveSettings() {
+  gasUrl = document.getElementById('gasUrl').value;
+  localStorage.setItem('clean_gas_url', gasUrl);
+  alert("設定を保存しました");
+}
+
+init();
+</script>
+</body>
+</html>
