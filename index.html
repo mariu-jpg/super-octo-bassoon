@@ -67,15 +67,58 @@
     white-space: nowrap; padding: 6px 14px; border-radius: 15px; background: var(--white);
     font-size: 12px; font-weight: 700; cursor: pointer; border: none; box-shadow: var(--card-shadow);
   }
-  .loc-tab.active { background: var(--accent-blue); color: var(--white); }
+  .loc-tab.active { background: var(--accent-orange); color: var(--white); }
 
   .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
   .task-btn {
     background: var(--white); border: none; border-radius: 12px; padding: 12px 5px;
     font-size: 12px; font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.04); cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s; color: #484848;
   }
   .task-btn:active { background: var(--bg-base); }
+
+  /* タイマー手入力 */
+  .timer-manual {
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;
+  }
+  .timer-manual input {
+    width: 120px; padding: 10px 12px; border: 2px solid var(--bg-base); border-radius: 12px;
+    font-family: inherit; font-size: 14px; font-weight: 700; text-align: center;
+    color: var(--text-main); outline: none;
+  }
+  .timer-manual input:focus { border-color: var(--accent-blue); }
+  .btn-set {
+    width: 90px; padding: 10px; font-size: 13px; border-radius: 12px; background: var(--bg-base);
+    border: 2px solid var(--bg-base); font-family: inherit; font-weight: 700; cursor: pointer;
+    color: var(--text-main); transition: all 0.15s; text-align: center;
+  }
+  .btn-set:active { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+
+  /* ページ下部の追加エリア（普段は折りたたみ） */
+  .extra-section {
+    overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.3s;
+    opacity: 0; pointer-events: none;
+  }
+  .extra-section.open { max-height: 200px; opacity: 1; pointer-events: auto; }
+
+  /* 自由入力 */
+  .custom-input-row { display: flex; gap: 8px; margin-top: 8px; }
+  .custom-input-row input {
+    flex: 1; padding: 11px 14px; border: 2px solid var(--bg-base); border-radius: 14px;
+    font-family: inherit; font-size: 13px; font-weight: 700; color: var(--text-main); outline: none;
+  }
+  .custom-input-row input:focus { border-color: var(--accent-orange); }
+  .custom-input-row button {
+    padding: 11px 18px; border: none; border-radius: 14px; background: var(--accent-orange);
+    color: white; font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer;
+  }
+
+  /* もっと見るトグル */
+  .toggle-extra {
+    width: 100%; padding: 10px; border: none; background: none; font-family: inherit;
+    font-size: 12px; color: #BBB; font-weight: 700; cursor: pointer; text-align: center;
+  }
+  .toggle-extra:hover { color: var(--accent-orange); }
 
   /* 集計 */
   .period-toggle {
@@ -190,13 +233,31 @@
         <button id="timerBtn" class="btn btn-orange" onclick="toggleTimer()">スタート</button>
         <button class="btn btn-outline" onclick="resetTimer()">リセット</button>
       </div>
+      <!-- 手入力でセット -->
+      <div class="timer-manual">
+        <input type="number" id="manualMin" placeholder="分を入力" min="0" max="99">
+        <button class="btn-set" onclick="setManualTimer()">セット</button>
+      </div>
     </div>
 
     <!-- テンプレート -->
     <div class="section-title">テンプレート</div>
     <div id="categoryTabs" class="loc-tabs"></div>
     <div id="taskButtons" class="template-grid" style="margin-top:8px"></div>
-  </div>
+
+    <!-- 折りたたみ：自由入力 -->
+    <button class="toggle-extra" onclick="toggleExtra(this)">＋ 自由入力・その他</button>
+    <div class="extra-section" id="extraSection">
+      <div class="timer-card" style="margin-top:0;padding:16px 20px;">
+        <div class="section-title" style="margin-top:0">自由入力で記録</div>
+        <div class="custom-input-row">
+          <input type="text" id="customTaskInput" placeholder="例：窓を拭いた、靴を磨いた…">
+          <button onclick="saveCustomRecord()">＋</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-log -->
 
   <!-- ===== 統計パネル ===== -->
   <div id="panel-stats" class="panel">
@@ -279,7 +340,7 @@ let logs = [];          // { id, date, task, category, duration, timestamp }
 let timerInterval, seconds = 0, isRunning = false;
 let currentMonth = new Date();
 let statsPeriod = 'month'; // 'month' | 'week'
-const gasUrl = 'https://script.google.com/macros/s/AKfycby0q1HO8U5MAKYLOgu9JTlZVX1KwBIawsXO_znSif2WoFjIUMnyx6HhYAmmC3VP4lVhNQ/exec'; // ← デプロイ後のURLに書き換えてください
+const gasUrl = 'ここにGAS URLを貼り付ける'; // ← デプロイ後のURLに書き換えてください
 
 // ============================================================
 // 初期化
@@ -315,6 +376,31 @@ function updateTimerDisplay() {
   const m = Math.floor(seconds / 60), s = seconds % 60;
   document.getElementById('timerDisplay').textContent =
     `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+// 手入力でタイマーをセット
+function setManualTimer() {
+  if (isRunning) return;
+  const m = parseInt(document.getElementById('manualMin').value) || 0;
+  seconds = m * 60;
+  updateTimerDisplay();
+  document.getElementById('manualMin').value = '';
+}
+
+// 自由入力エリアの開閉
+function toggleExtra(btn) {
+  const sec = document.getElementById('extraSection');
+  const isOpen = sec.classList.toggle('open');
+  btn.textContent = isOpen ? '▲ 閉じる' : '＋ 自由入力・その他';
+}
+
+// 自由入力で記録
+async function saveCustomRecord() {
+  const input = document.getElementById('customTaskInput');
+  const taskName = input.value.trim();
+  if (!taskName) { input.focus(); return; }
+  input.value = '';
+  await saveRecord(taskName, 'other', null);
 }
 
 // ============================================================
