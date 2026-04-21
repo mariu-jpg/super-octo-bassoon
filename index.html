@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Cleaning log✨</title>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -21,7 +21,7 @@
     font-family: 'Zen Maru Gothic', sans-serif;
     background-color: var(--bg-base);
     color: var(--text-main);
-    padding-bottom: 100px;
+    padding-bottom: 80px;
   }
 
   .header {
@@ -77,48 +77,44 @@
   }
   .task-btn:active { background: var(--bg-base); }
 
-  /* タイマー手入力 */
+  /* ① タイマー手入力 — font-size:16px でSP自動拡大を防止 */
   .timer-manual {
     display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;
   }
   .timer-manual input {
-    width: 120px; padding: 10px 12px; border: 2px solid var(--bg-base); border-radius: 12px;
-    font-family: inherit; font-size: 14px; font-weight: 700; text-align: center;
+    width: 120px; padding: 10px 12px;
+    border: 2px solid var(--bg-base); border-radius: 12px;
+    font-family: inherit; font-size: 16px;
+    font-weight: 700; text-align: center;
     color: var(--text-main); outline: none;
   }
   .timer-manual input:focus { border-color: var(--accent-blue); }
   .btn-set {
-    width: 90px; padding: 10px; font-size: 13px; border-radius: 12px; background: var(--bg-base);
-    border: 2px solid var(--bg-base); font-family: inherit; font-weight: 700; cursor: pointer;
+    width: 90px; padding: 10px; font-size: 13px; border-radius: 12px;
+    background: var(--bg-base); border: 2px solid var(--bg-base);
+    font-family: inherit; font-weight: 700; cursor: pointer;
     color: var(--text-main); transition: all 0.15s; text-align: center;
   }
   .btn-set:active { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
 
-  /* ページ下部の追加エリア（普段は折りたたみ） */
-  .extra-section {
-    overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.3s;
-    opacity: 0; pointer-events: none;
-  }
-  .extra-section.open { max-height: 200px; opacity: 1; pointer-events: auto; }
+  /* ③ テンプレートと自由入力の間の余白 */
+  .free-input-section { margin-top: 24px; }
 
-  /* 自由入力 */
+  /* ② 自由入力 — 常時表示・min-width:0 で幅崩れ防止・font-size:16px でSP拡大防止 */
   .custom-input-row { display: flex; gap: 8px; margin-top: 8px; }
   .custom-input-row input {
-    flex: 1; padding: 11px 14px; border: 2px solid var(--bg-base); border-radius: 14px;
-    font-family: inherit; font-size: 13px; font-weight: 700; color: var(--text-main); outline: none;
+    flex: 1; min-width: 0;
+    padding: 11px 14px; border: 2px solid var(--bg-base); border-radius: 14px;
+    font-family: inherit; font-size: 16px;
+    font-weight: 700; color: var(--text-main); outline: none;
   }
   .custom-input-row input:focus { border-color: var(--accent-orange); }
   .custom-input-row button {
-    padding: 11px 18px; border: none; border-radius: 14px; background: var(--accent-orange);
-    color: white; font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer;
+    flex-shrink: 0;
+    padding: 11px 18px; border: none; border-radius: 14px;
+    background: var(--accent-orange); color: white;
+    font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer;
   }
-
-  /* もっと見るトグル */
-  .toggle-extra {
-    width: 100%; padding: 10px; border: none; background: none; font-family: inherit;
-    font-size: 12px; color: #BBB; font-weight: 700; cursor: pointer; text-align: center;
-  }
-  .toggle-extra:hover { color: var(--accent-orange); }
 
   /* 集計 */
   .period-toggle {
@@ -146,11 +142,9 @@
 
   /* カレンダー */
   .cal-day-header { font-size: 10px; color: #AAA; font-weight: 700; }
-  .cal-cell {
-    padding: 5px 2px; border-radius: 8px; font-size: 12px; cursor: pointer; position: relative;
-  }
+  .cal-cell { padding: 5px 2px; border-radius: 8px; font-size: 12px; cursor: pointer; }
   .cal-cell.has-log { color: var(--accent-orange); font-weight: 700; }
-  .cal-cell.today { background: var(--accent-orange); color: var(--white) !important; font-weight: 700; border-radius: 8px; }
+  .cal-cell.today { background: var(--accent-orange); color: var(--white) !important; font-weight: 700; }
 
   /* ログ一覧 */
   .log-item {
@@ -173,46 +167,26 @@
 
   /* トースト */
   .toast {
-    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(10px);
     background: var(--text-main); color: white; padding: 10px 20px; border-radius: 20px;
     font-size: 13px; font-weight: 700; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* GAS URL 入力バー */
-  .gas-bar {
-    display: flex; gap: 8px; align-items: center; background: var(--bg-base);
-    border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px;
-  }
-  .gas-bar input {
-    flex: 1; border: none; background: transparent; font-family: inherit; font-size: 12px;
-    color: var(--text-main); outline: none;
-  }
-  .gas-dot { width: 8px; height: 8px; border-radius: 50%; background: #CCC; flex-shrink: 0; }
-  .gas-dot.ok { background: #6BCB8B; }
-
+  /* ④ ナビバー — padding増・アイコン＋ラベル縦並びで高さアップ */
   .nav-bar {
     position: fixed; bottom: 0; left: 0; right: 0; background: var(--white);
-    display: flex; justify-content: space-around; padding: 12px 0;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+    display: flex; justify-content: space-around;
+    padding: 12px 0 20px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
   }
-  .nav-item { border: none; background: none; color: #BBB; font-size: 10px; font-weight: 700; cursor: pointer; padding: 6px 12px; }
+  .nav-item {
+    border: none; background: none; color: #BBB; font-size: 10px; font-weight: 700;
+    cursor: pointer; padding: 4px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .nav-icon { font-size: 22px; line-height: 1; }
   .nav-item.active { color: var(--accent-orange); }
-
-  /* モーダル */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(74,67,63,0.3);
-    backdrop-filter: blur(3px); z-index: 200; align-items: flex-end; justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: white; border-radius: 28px 28px 0 0; padding: 24px 20px 36px;
-    width: 100%; max-width: 500px; max-height: 70vh; overflow-y: auto;
-    animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal-handle { width: 36px; height: 4px; background: #E0D8D0; border-radius: 2px; margin: 0 auto 16px; }
-  .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--accent-orange); }
 </style>
 </head>
 <body>
@@ -233,9 +207,9 @@
         <button id="timerBtn" class="btn btn-orange" onclick="toggleTimer()">スタート</button>
         <button class="btn btn-outline" onclick="resetTimer()">リセット</button>
       </div>
-      <!-- 手入力でセット -->
+      <!-- ① 手入力（拡大なし） -->
       <div class="timer-manual">
-        <input type="number" id="manualMin" placeholder="分を入力" min="0" max="99">
+        <input type="number" id="manualMin" placeholder="分を入力" min="0" max="99" inputmode="numeric">
         <button class="btn-set" onclick="setManualTimer()">セット</button>
       </div>
     </div>
@@ -245,15 +219,12 @@
     <div id="categoryTabs" class="loc-tabs"></div>
     <div id="taskButtons" class="template-grid" style="margin-top:8px"></div>
 
-    <!-- 折りたたみ：自由入力 -->
-    <button class="toggle-extra" onclick="toggleExtra(this)">＋ 自由入力・その他</button>
-    <div class="extra-section" id="extraSection">
-      <div class="timer-card" style="margin-top:0;padding:16px 20px;">
-        <div class="section-title" style="margin-top:0">自由入力で記録</div>
-        <div class="custom-input-row">
-          <input type="text" id="customTaskInput" placeholder="例：窓を拭いた、靴を磨いた…">
-          <button onclick="saveCustomRecord()">＋</button>
-        </div>
+    <!-- ②③ 自由入力（常時表示・余白あり・幅崩れ修正） -->
+    <div class="free-input-section">
+      <div class="section-title" style="margin-top:0">自由入力</div>
+      <div class="custom-input-row">
+        <input type="text" id="customTaskInput" placeholder="例：窓を拭いた、靴を磨いた…">
+        <button onclick="saveCustomRecord()">＋</button>
       </div>
     </div>
 
@@ -262,12 +233,10 @@
   <!-- ===== 統計パネル ===== -->
   <div id="panel-stats" class="panel">
     <div class="stats-card">
-      <!-- 月/週 切り替え -->
       <div class="period-toggle">
         <button class="period-btn active" id="btnMonth" onclick="setPeriod('month')">月間</button>
         <button class="period-btn" id="btnWeek" onclick="setPeriod('week')">週間（月曜始まり）</button>
       </div>
-
       <div class="stats-summary">
         <div class="stat-box">
           <div class="stat-label" id="totalLabel">今月の合計</div>
@@ -278,12 +247,10 @@
           <div id="totalCount" class="stat-val">0回</div>
         </div>
       </div>
-
       <div class="section-title">場所別の比率</div>
       <div id="locationStats" class="bar-chart"></div>
     </div>
 
-    <!-- カレンダー -->
     <div class="calendar-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)">◀</button>
@@ -293,7 +260,6 @@
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;" id="calendarGrid"></div>
     </div>
 
-    <!-- 選択日の詳細 -->
     <div class="log-card" id="dayDetailCard" style="display:none">
       <div class="section-title" id="dayDetailTitle"></div>
       <div id="dayDetailBody"></div>
@@ -313,18 +279,22 @@
 
 </div><!-- /container -->
 
+<!-- ④ ナビバー（アイコン+ラベル縦並び） -->
 <nav class="nav-bar">
-  <button class="nav-item active" onclick="switchTab('log', this)">🧹 記録</button>
-  <button class="nav-item" onclick="switchTab('stats', this); updateStats(); renderCalendar();">📊 統計</button>
-  <button class="nav-item" onclick="switchTab('list', this); renderLogList();">📋 一覧</button>
+  <button class="nav-item active" onclick="switchTab('log', this)">
+    <span class="nav-icon">🧹</span>記録
+  </button>
+  <button class="nav-item" onclick="switchTab('stats', this); updateStats(); renderCalendar();">
+    <span class="nav-icon">📊</span>統計
+  </button>
+  <button class="nav-item" onclick="switchTab('list', this); renderLogList();">
+    <span class="nav-icon">📋</span>一覧
+  </button>
 </nav>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================
-// 設定
-// ============================================================
 const TASKS = {
   living:  { name: "リビング", items: ["全般", "床拭き", "片付け", "テーブル拭き", "ゴミ捨て"] },
   kitchen: { name: "キッチン", items: ["全般", "シンク", "コンロ", "片付け", "冷蔵庫", "棚拭き", "床拭き"] },
@@ -333,39 +303,26 @@ const TASKS = {
   other:   { name: "その他",  items: ["玄関", "洗濯", "窓を拭く", "靴を揃える"] }
 };
 
-// ============================================================
-// 状態
-// ============================================================
-let logs = [];          // { id, date, task, category, duration, timestamp }
+let logs = [];
 let timerInterval, seconds = 0, isRunning = false;
 let currentMonth = new Date();
-let statsPeriod = 'month'; // 'month' | 'week'
+let statsPeriod = 'month';
 const gasUrl = 'ここにGAS URLを貼り付ける'; // ← デプロイ後のURLに書き換えてください
 
-// ============================================================
-// 初期化
-// ============================================================
 function init() {
-  // ローカルキャッシュからロード
   const cached = localStorage.getItem('clean_logs');
   if (cached) logs = JSON.parse(cached);
-
   renderCategoryTabs();
   updateStats();
   renderCalendar();
 }
 
-// ============================================================
-// タイマー
-// ============================================================
 function toggleTimer() {
   const btn = document.getElementById('timerBtn');
   if (!isRunning) {
     isRunning = true; btn.textContent = "ストップ";
     timerInterval = setInterval(() => { seconds++; updateTimerDisplay(); }, 1000);
-  } else {
-    stopTimer();
-  }
+  } else { stopTimer(); }
 }
 function stopTimer() {
   clearInterval(timerInterval); isRunning = false;
@@ -377,8 +334,6 @@ function updateTimerDisplay() {
   document.getElementById('timerDisplay').textContent =
     `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
-
-// 手入力でタイマーをセット
 function setManualTimer() {
   if (isRunning) return;
   const m = parseInt(document.getElementById('manualMin').value) || 0;
@@ -387,14 +342,6 @@ function setManualTimer() {
   document.getElementById('manualMin').value = '';
 }
 
-// 自由入力エリアの開閉
-function toggleExtra(btn) {
-  const sec = document.getElementById('extraSection');
-  const isOpen = sec.classList.toggle('open');
-  btn.textContent = isOpen ? '▲ 閉じる' : '＋ 自由入力・その他';
-}
-
-// 自由入力で記録
 async function saveCustomRecord() {
   const input = document.getElementById('customTaskInput');
   const taskName = input.value.trim();
@@ -403,9 +350,6 @@ async function saveCustomRecord() {
   await saveRecord(taskName, 'other', null);
 }
 
-// ============================================================
-// テンプレート
-// ============================================================
 function renderCategoryTabs() {
   const container = document.getElementById('categoryTabs');
   container.innerHTML = Object.keys(TASKS).map((key, i) => `
@@ -414,7 +358,6 @@ function renderCategoryTabs() {
     </button>`).join('');
   filterTasks(Object.keys(TASKS)[0], container.firstElementChild);
 }
-
 function filterTasks(key, el) {
   document.querySelectorAll('.loc-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
@@ -422,237 +365,147 @@ function filterTasks(key, el) {
     <button class="task-btn" onclick="saveRecord('${t}','${key}',this)">${t}</button>`).join('');
 }
 
-// ============================================================
-// 記録保存 → GAS POST
-// ============================================================
 async function saveRecord(taskName, category, btn) {
   const duration = Math.ceil(seconds / 60) || 1;
   const now = new Date();
   const entry = {
     id: now.getTime().toString(),
     date: now.toLocaleDateString('ja-JP'),
-    task: taskName,
-    category,
-    duration,
+    task: taskName, category, duration,
     timestamp: now.getTime()
   };
-
-  // ローカルキャッシュ追加
   logs.unshift(entry);
-  saveLocal();
-  resetTimer();
-  updateStats();
-  renderCalendar();
+  saveLocal(); resetTimer(); updateStats(); renderCalendar();
   showToast(`「${taskName}」を記録しました ✓`);
 
-  // GAS へ送信
-  if (!gasUrl) return;
+  if (!gasUrl || gasUrl.includes('貼り付け')) return;
   const orig = btn ? btn.textContent : '';
   if (btn) btn.innerHTML = '<span class="spinner"></span>';
   try {
     await fetch(gasUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'add', entry })
     });
     if (btn) btn.textContent = '✓ 保存済み';
     setTimeout(() => { if (btn) btn.textContent = orig; }, 1500);
-  } catch(e) {
-    console.error('GAS送信失敗', e);
-    if (btn) btn.textContent = orig;
-  }
+  } catch(e) { console.error('GAS送信失敗', e); if (btn) btn.textContent = orig; }
 }
+function saveLocal() { localStorage.setItem('clean_logs', JSON.stringify(logs)); }
 
-function saveLocal() {
-  localStorage.setItem('clean_logs', JSON.stringify(logs));
-}
-
-// ============================================================
-// GAS からデータ読み込み（同期）
-// ============================================================
 async function syncFromSheets() {
-  if (!gasUrl) { showToast('GAS URL が設定されていません'); return; }
+  if (!gasUrl || gasUrl.includes('貼り付け')) { showToast('GAS URL が設定されていません'); return; }
   showToast('🔄 読み込み中…');
   try {
     const res = await fetch(gasUrl + '?action=getAll');
     const data = await res.json();
     if (Array.isArray(data)) {
-      logs = data;
-      saveLocal();
-      updateStats();
-      renderCalendar();
-      renderLogList();
+      logs = data; saveLocal(); updateStats(); renderCalendar(); renderLogList();
       showToast(`✅ ${logs.length}件 読み込みました`);
     }
-  } catch(e) {
-    showToast('⚠ 読み込みに失敗しました');
-    console.error(e);
-  }
+  } catch(e) { showToast('⚠ 読み込みに失敗しました'); console.error(e); }
 }
 
-// ============================================================
-// 削除
-// ============================================================
 async function deleteLog(id) {
   logs = logs.filter(l => l.id !== id);
-  saveLocal();
-  updateStats();
-  renderCalendar();
-  renderLogList();
+  saveLocal(); updateStats(); renderCalendar(); renderLogList();
   showToast('削除しました');
-
-  if (!gasUrl) return;
+  if (!gasUrl || gasUrl.includes('貼り付け')) return;
   try {
     await fetch(gasUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'delete', id })
     });
   } catch(e) { console.error('GAS削除失敗', e); }
 }
 
-// ============================================================
-// 統計
-// ============================================================
 function setPeriod(p) {
   statsPeriod = p;
   document.getElementById('btnMonth').classList.toggle('active', p === 'month');
   document.getElementById('btnWeek').classList.toggle('active', p === 'week');
   updateStats();
 }
-
 function getPeriodLogs() {
-  const now = new Date();
-  let start;
+  const now = new Date(); let start;
   if (statsPeriod === 'month') {
     start = new Date(now.getFullYear(), now.getMonth(), 1);
   } else {
-    // 月曜始まり
-    const day = now.getDay(); // 0=Sun
-    const diffToMon = (day === 0) ? 6 : day - 1;
-    start = new Date(now);
-    start.setDate(now.getDate() - diffToMon);
-    start.setHours(0, 0, 0, 0);
+    const day = now.getDay(), diffToMon = (day === 0) ? 6 : day - 1;
+    start = new Date(now); start.setDate(now.getDate() - diffToMon); start.setHours(0,0,0,0);
   }
   return logs.filter(l => new Date(l.timestamp) >= start);
 }
-
 function updateStats() {
   const filtered = getPeriodLogs();
   const total = filtered.reduce((s, l) => s + l.duration, 0);
-  const count = filtered.length;
-
-  document.getElementById('totalLabel').textContent =
-    statsPeriod === 'month' ? '今月の合計' : '今週の合計（月曜〜）';
+  document.getElementById('totalLabel').textContent = statsPeriod === 'month' ? '今月の合計' : '今週の合計（月曜〜）';
   document.getElementById('totalTime').textContent = `${total}分`;
-  document.getElementById('totalCount').textContent = `${count}回`;
-
-  // 場所別比率
+  document.getElementById('totalCount').textContent = `${filtered.length}回`;
   const catMap = {};
   filtered.forEach(l => { catMap[l.category] = (catMap[l.category] || 0) + l.duration; });
-  const allKeys = Object.keys(TASKS);
-  const html = allKeys.map(key => {
-    const val = catMap[key] || 0;
-    const pct = total > 0 ? Math.round(val / total * 100) : 0;
-    return `
-      <div class="bar-row">
-        <div class="bar-label">${TASKS[key].name}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="bar-pct">${pct}%</div>
-      </div>`;
+  document.getElementById('locationStats').innerHTML = Object.keys(TASKS).map(key => {
+    const val = catMap[key] || 0, pct = total > 0 ? Math.round(val / total * 100) : 0;
+    return `<div class="bar-row">
+      <div class="bar-label">${TASKS[key].name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-pct">${pct}%</div>
+    </div>`;
   }).join('');
-  document.getElementById('locationStats').innerHTML = html;
 }
 
-// ============================================================
-// カレンダー（日曜始まり → 月曜始まりに変更）
-// ============================================================
 function renderCalendar() {
   const grid = document.getElementById('calendarGrid');
   const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
   document.getElementById('calTitle').textContent = `${y}年${m + 1}月`;
   grid.innerHTML = '';
-
-  const dayNames = ['月','火','水','木','金','土','日'];
-  dayNames.forEach(d => {
-    const h = document.createElement('div');
-    h.className = 'cal-day-header'; h.textContent = d; grid.appendChild(h);
+  ['月','火','水','木','金','土','日'].forEach(d => {
+    const h = document.createElement('div'); h.className = 'cal-day-header'; h.textContent = d; grid.appendChild(h);
   });
-
-  // 1日の曜日（月曜=0 に変換）
-  const firstDow = new Date(y, m, 1).getDay(); // 0=Sun
+  const firstDow = new Date(y, m, 1).getDay();
   const firstMon = (firstDow === 0) ? 6 : firstDow - 1;
   const days = new Date(y, m + 1, 0).getDate();
   const todayStr = new Date().toDateString();
-
-  for (let i = 0; i < firstMon; i++) {
-    grid.appendChild(document.createElement('div'));
-  }
+  for (let i = 0; i < firstMon; i++) grid.appendChild(document.createElement('div'));
   for (let d = 1; d <= days; d++) {
-    const cell = document.createElement('div');
-    cell.className = 'cal-cell';
-    cell.textContent = d;
+    const cell = document.createElement('div'); cell.className = 'cal-cell'; cell.textContent = d;
     const dateObj = new Date(y, m, d);
-    if (logs.some(l => new Date(l.timestamp).toDateString() === dateObj.toDateString()))
-      cell.classList.add('has-log');
-    if (dateObj.toDateString() === todayStr)
-      cell.classList.add('today');
+    if (logs.some(l => new Date(l.timestamp).toDateString() === dateObj.toDateString())) cell.classList.add('has-log');
+    if (dateObj.toDateString() === todayStr) cell.classList.add('today');
     cell.onclick = () => showDayDetail(y, m, d);
     grid.appendChild(cell);
   }
 }
-
-function changeMonth(d) {
-  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + d, 1);
-  renderCalendar();
-}
-
+function changeMonth(d) { currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + d, 1); renderCalendar(); }
 function showDayDetail(y, m, d) {
   const target = new Date(y, m, d).toDateString();
   const dayLogs = logs.filter(l => new Date(l.timestamp).toDateString() === target);
   const card = document.getElementById('dayDetailCard');
-  const title = document.getElementById('dayDetailTitle');
-  const body = document.getElementById('dayDetailBody');
-
-  title.textContent = `${y}年${m + 1}月${d}日`;
-  if (dayLogs.length === 0) {
-    body.innerHTML = '<div style="color:#CCC;font-size:13px;padding:8px 0">記録なし</div>';
-  } else {
-    body.innerHTML = dayLogs.map(l => `
-      <div class="log-item">
+  document.getElementById('dayDetailTitle').textContent = `${y}年${m + 1}月${d}日`;
+  document.getElementById('dayDetailBody').innerHTML = dayLogs.length === 0
+    ? '<div style="color:#CCC;font-size:13px;padding:8px 0">記録なし</div>'
+    : dayLogs.map(l => `<div class="log-item">
         <div class="log-info">
           <div class="log-task">${l.task}</div>
           <div class="log-meta">${TASKS[l.category]?.name || l.category} · ${l.duration}分</div>
         </div>
         <button class="log-del" onclick="deleteLog('${l.id}');document.getElementById('dayDetailCard').style.display='none'" title="削除">🗑</button>
       </div>`).join('');
-  }
   card.style.display = '';
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// ============================================================
-// ログ一覧
-// ============================================================
 function renderLogList() {
   const el = document.getElementById('logList');
-  if (logs.length === 0) {
-    el.innerHTML = '<div style="color:#CCC;font-size:13px;padding:8px 0">記録がありません</div>';
-    return;
-  }
-  el.innerHTML = logs.slice(0, 100).map(l => `
-    <div class="log-item">
-      <div class="log-info">
-        <div class="log-task">${l.task}</div>
-        <div class="log-meta">${l.date} · ${TASKS[l.category]?.name || l.category} · ${l.duration}分</div>
-      </div>
-      <button class="log-del" onclick="deleteLog('${l.id}')" title="削除">🗑</button>
-    </div>`).join('');
+  el.innerHTML = logs.length === 0
+    ? '<div style="color:#CCC;font-size:13px;padding:8px 0">記録がありません</div>'
+    : logs.slice(0, 100).map(l => `<div class="log-item">
+        <div class="log-info">
+          <div class="log-task">${l.task}</div>
+          <div class="log-meta">${l.date} · ${TASKS[l.category]?.name || l.category} · ${l.duration}分</div>
+        </div>
+        <button class="log-del" onclick="deleteLog('${l.id}')" title="削除">🗑</button>
+      </div>`).join('');
 }
 
-// ============================================================
-// タブ切り替え
-// ============================================================
 function switchTab(tab, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById(`panel-${tab}`).classList.add('active');
@@ -660,18 +513,11 @@ function switchTab(tab, el) {
   el.classList.add('active');
 }
 
-// ============================================================
-// トースト
-// ============================================================
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ============================================================
-// 起動
-// ============================================================
 init();
 </script>
 </body>
